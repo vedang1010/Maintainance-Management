@@ -1,12 +1,106 @@
 const Maintenance = require('../models/Maintenance');
 const PaymentLog = require('../models/PaymentLog');
 const razorpay = require('../config/razorpay');
-
+const Building = require('../models/Building');
 /**
  * @desc    Get current user's maintenance records
  * @route   GET /api/maintenance
  * @access  Private
  */
+const calculateMaintenance = (user, building, template) => {
+
+  let components = [];
+  let total = 0;
+
+  // TEMPLATE COMPONENTS
+  template.components.forEach(component => {
+
+    let amount = 0;
+
+    switch (component.type) {
+
+      case "fixed":
+        amount = component.rate;
+        break;
+
+      case "per_flat":
+        amount = component.rate;
+        break;
+
+      case "per_sqft":
+        amount = component.rate * user.flat_area;
+        break;
+
+      default:
+        amount = 0;
+    }
+
+    components.push({
+      name: component.name,
+      calculation_type: component.type,
+      rate: component.rate,
+      amount
+    });
+
+    total += amount;
+
+  });
+
+  // PARKING RULES
+  building.parking_rules.forEach(rule => {
+
+    if (rule.type === "2wheeler") {
+
+      const count = user.parking?.two_wheeler || 0;
+
+      if (count > 0) {
+
+        const amount = count * rule.monthly_charge;
+
+        components.push({
+          name: "2 Wheeler Parking",
+          calculation_type: "per_vehicle",
+          rate: rule.monthly_charge,
+          quantity: count,
+          amount
+        });
+
+        total += amount;
+
+      }
+
+    }
+
+    if (rule.type === "4wheeler") {
+
+      const count = user.parking?.four_wheeler || 0;
+
+      if (count > 0) {
+
+        const amount = count * rule.monthly_charge;
+
+        components.push({
+          name: "4 Wheeler Parking",
+          calculation_type: "per_vehicle",
+          rate: rule.monthly_charge,
+          quantity: count,
+          amount
+        });
+
+        total += amount;
+
+      }
+
+    }
+
+  });
+
+  return {
+    components,
+    total
+  };
+
+};
 exports.getUserMaintenance = async (req, res, next) => {
   try {
     const { status, year } = req.query;
@@ -44,8 +138,9 @@ exports.getUserMaintenance = async (req, res, next) => {
  */
 exports.getCurrentMonthStatus = async (req, res, next) => {
   try {
+
     const now = new Date();
-    const currentMonth = now.getMonth() + 1; // 1-12
+    const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
 
     let maintenance = await Maintenance.findOne({
@@ -54,33 +149,63 @@ exports.getCurrentMonthStatus = async (req, res, next) => {
       year: currentYear
     }).lean();
 
-    // If no maintenance record exists for current month, create one
     if (!maintenance) {
-      // Calculate due date (18th of current month)
-      const dueDate = new Date(currentYear, currentMonth - 1, 18);
-      
+
+      const building = await Building.findById(req.user.building_id);
+
+      const template = building.maintenance_templates.find(
+        t => t.is_default === true
+      );
+
+      if (!template) {
+        return res.status(400).json({
+          success: false,
+          message: "No default maintenance template configured"
+        });
+      }
+
+      const dueDate = new Date(
+        currentYear,
+        currentMonth - 1,
+        building.maintenance_due_day || 18
+      );
+
+      // Dynamic maintenance calculation
+      const { components, total } = calculateMaintenance(
+        req.user,
+        building,
+        template
+      );
+
       maintenance = await Maintenance.create({
+
         user_id: req.user._id,
         flat_no: req.user.flat_no,
         month: currentMonth,
         year: currentYear,
-        amount: 1000,
-        late_fee: 0,
+        components,
+        amount: total,
+        penalty: 0,
+        total_amount: total,
         due_date: dueDate,
-        status: 'pending'
+        status: "pending"
+
       });
-      
-      // Convert to plain object
+
       maintenance = maintenance.toObject();
+
     }
 
     res.status(200).json({
       success: true,
       data: maintenance
     });
+
   } catch (error) {
-    console.error('Error fetching current month status:', error);
+
+    console.error("Error fetching current month status:", error);
     next(error);
+
   }
 };
 
@@ -292,7 +417,7 @@ exports.createOrder = async (req, res, next) => {
         message: 'Maintenance ID is required'
       });
     }
-
+    
     // Find maintenance record
     const maintenance = await Maintenance.findById(maintenance_id);
 
@@ -332,9 +457,8 @@ exports.createOrder = async (req, res, next) => {
         user_id: req.user._id.toString()
       }
     };
-
     const order = await razorpay.orders.create(options);
-
+  
     // Save order ID to maintenance record
     maintenance.razorpay_order_id = order.id;
     await maintenance.save();
@@ -372,66 +496,98 @@ exports.createOrder = async (req, res, next) => {
  * @access  Private (Manager only)
  */
 exports.generateMonthlyMaintenance = async (req, res, next) => {
+
   try {
+
     const { month, year } = req.body;
+
     const User = require('../models/User');
 
     const targetMonth = month || new Date().getMonth() + 1;
     const targetYear = year || new Date().getFullYear();
-    
-    // Get all active residents
-    const users = await User.find({ 
-      role: { $in: ['resident', 'admin', 'manager'] },
-      is_active: true 
-    }).select('_id flat_no');
 
-    // Calculate due date (18th of target month)
-    const dueDate = new Date(targetYear, targetMonth - 1, 18);
+    const building = await Building.findById(req.user.building_id);
 
-    let created = 0;
-    let skipped = 0;
+    const template = building.maintenance_templates.find(
+      t => t.is_default === true
+    );
+
+    if (!template) {
+      return res.status(400).json({
+        success: false,
+        message: "No default maintenance template configured"
+      });
+    }
+
+    const users = await User.find({
+      building_id: req.user.building_id,
+      is_active: true
+    }).lean();
+
+    const dueDate = new Date(
+      targetYear,
+      targetMonth - 1,
+      building.maintenance_due_day || 18
+    );
+
+    const existing = await Maintenance.find({
+      month: targetMonth,
+      year: targetYear
+    }).select("user_id");
+
+    const existingUserIds = new Set(
+      existing.map(m => m.user_id.toString())
+    );
+
+    const bulkData = [];
 
     for (const user of users) {
-      // Check if maintenance already exists
-      const exists = await Maintenance.findOne({
+
+      if (existingUserIds.has(user._id.toString())) continue;
+
+      const { components, total } = calculateMaintenance(
+        user,
+        building,
+        template
+      );
+
+      bulkData.push({
+
         user_id: user._id,
+        flat_no: user.flat_no,
         month: targetMonth,
-        year: targetYear
+        year: targetYear,
+        components,
+        amount: total,
+        penalty: 0,
+        total_amount: total,
+        due_date: dueDate,
+        status: "pending"
+
       });
 
-      if (!exists) {
-        await Maintenance.create({
-          user_id: user._id,
-          flat_no: user.flat_no,
-          month: targetMonth,
-          year: targetYear,
-          amount: 1000,
-          late_fee: 0,
-          due_date: dueDate,
-          status: 'pending'
-        });
-        created++;
-      } else {
-        skipped++;
-      }
+    }
+
+    if (bulkData.length > 0) {
+      await Maintenance.insertMany(bulkData);
     }
 
     res.status(200).json({
       success: true,
-      message: `Maintenance records generated: ${created} created, ${skipped} skipped (already exist)`,
+      message: "Maintenance generated successfully",
       data: {
-        month: targetMonth,
-        year: targetYear,
-        created,
-        skipped
+        created: bulkData.length
       }
     });
-  } catch (error) {
-    console.error('Error generating maintenance:', error);
-    next(error);
-  }
-};
 
+  } catch (error) {
+
+    console.error("Maintenance generation error:", error);
+    next(error);
+
+  }
+
+};
 // ========== CRON JOB MANUAL TRIGGERS ==========
 
 const { generateMonthlyMaintenance, generateMaintenanceForMonth } = require('../jobs/maintenanceGenerator');
@@ -517,4 +673,109 @@ exports.triggerPaymentReminders = async (req, res, next) => {
     console.error('Error triggering payment reminders:', error);
     next(error);
   }
+};
+
+exports.updateMaintenanceTemplate = async (req, res, next) => {
+
+  try {
+
+    const building = await Building.findById(req.user.building_id);
+
+    const { template } = req.body;
+
+    const existingTemplate = building.maintenance_templates.find(
+      t => t.name === template.name
+    );
+
+    if (existingTemplate) {
+      Object.assign(existingTemplate, template);
+    } else {
+      building.maintenance_templates.push(template);
+    }
+
+    await building.save();
+
+    res.status(200).json({
+      success: true,
+      data: building.maintenance_templates
+    });
+
+  } catch (error) {
+    next(error);
+  }
+
+};
+
+exports.updateParkingRules = async (req, res, next) => {
+
+  try {
+
+    const building = await Building.findById(req.user.building_id);
+
+    building.parking_rules = req.body.parking_rules;
+
+    await building.save();
+
+    res.status(200).json({
+      success: true,
+      data: building.parking_rules
+    });
+
+  } catch (error) {
+    next(error);
+  }
+
+};
+
+exports.updatePenaltyRules = async (req, res, next) => {
+
+  try {
+
+    const building = await Building.findById(req.user.building_id);
+
+    building.penalty_rules = req.body.penalty_rules;
+
+    await building.save();
+
+    res.status(200).json({
+      success: true,
+      data: building.penalty_rules
+    });
+
+  } catch (error) {
+    next(error);
+  }
+
+};
+
+exports.calculatePenalty = (maintenance, building) => {
+
+  const today = new Date();
+
+  if (today <= maintenance.due_date) return 0;
+
+  const daysLate = Math.floor(
+    (today - maintenance.due_date) / (1000 * 60 * 60 * 24)
+  );
+
+  let penalty = 0;
+
+  building.penalty_rules.forEach(rule => {
+
+    if (daysLate >= rule.days_after_due) {
+
+      if (rule.penalty_type === "fixed") {
+        penalty = rule.value;
+      }
+
+      if (rule.penalty_type === "percentage") {
+        penalty = (maintenance.amount * rule.value) / 100;
+      }
+
+    }
+
+  });
+
+  return Math.round(penalty);
+
 };

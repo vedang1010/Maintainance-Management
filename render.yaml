@@ -4,7 +4,7 @@
 services:
   # Backend API Service (Docker)
   - type: web
-    name: rajarshi-darshan-api
+    name: ambica-apartment-api
     runtime: docker
     dockerfilePath: ./server/Dockerfile
     dockerContext: ./server
@@ -30,7 +30,7 @@ services:
       - key: BREVO_SENDER_EMAIL
         sync: false
       - key: BREVO_SENDER_NAME
-        value: "Rajarshi Darshan Society"
+        value: "Ambica Apartment"
       - key: IMAGEKIT_PUBLIC_KEY
         sync: false
       - key: IMAGEKIT_PRIVATE_KEY

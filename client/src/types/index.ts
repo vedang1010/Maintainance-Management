@@ -1,17 +1,27 @@
 // User Types
 export interface User {
-  _id: string;
-  name: string;
-  email: string;
-  phone: string;
-  flat_no: string;
-  role: 'manager' | 'admin' | 'resident' | 'watchman';
-  is_active: boolean;
-  is_verified: boolean;
-  created_at: string;
-  updated_at: string;
-}
+  _id: string
+  name: string
+  email: string
+  phone: string
+  flat_no: string
 
+  building_id?: string
+  flat_area?: number
+
+  parking?: {
+    two_wheeler: number
+    four_wheeler: number
+  }
+
+  role: 'manager' | 'admin' | 'resident' | 'watchman'
+
+  is_active: boolean
+  is_verified: boolean
+
+  created_at: string
+  updated_at: string
+}
 export interface AuthResponse {
   success: boolean;
   message: string;
@@ -40,22 +50,37 @@ export interface RegisterData {
 export type ManagerSetupData = RegisterData;
 
 // Maintenance Types
+export interface MaintenanceComponent {
+  name: string
+  calculation_type?: 'fixed' | 'per_flat' | 'per_sqft' | 'per_vehicle'
+  rate: number
+  quantity?: number
+  amount: number
+}
 export interface Maintenance {
-  _id: string;
-  user_id: string;
-  flat_no: string;
-  month: number;
-  year: number;
-  amount: number;
-  late_fee: number;
-  total_amount: number;
-  due_date: string;
-  paid_date?: string;
-  status: 'pending' | 'paid' | 'overdue';
-  razorpay_payment_id?: string;
-  razorpay_order_id?: string;
-  created_at: string;
-  updated_at: string;
+  _id: string
+  user_id: string
+  flat_no: string
+
+  month: number
+  year: number
+
+  components?: MaintenanceComponent[]
+
+  amount: number
+  penalty: number
+  total_amount: number
+
+  due_date: string
+  paid_date?: string
+
+  status: 'pending' | 'paid' | 'overdue'
+
+  razorpay_payment_id?: string
+  razorpay_order_id?: string
+
+  created_at: string
+  updated_at: string
 }
 
 export interface PaymentLog {

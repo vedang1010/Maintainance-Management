@@ -306,7 +306,7 @@ export default function ShowcasePage() {
             </div>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-4 tracking-tight">
-              Rajarshi Darshan
+              Ambica Apartment
             </h1>
             <p className="text-xl sm:text-2xl text-indigo-200 font-medium mb-8">
               Society Management System
@@ -612,7 +612,7 @@ export default function ShowcasePage() {
                 <Building2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-white font-bold text-lg">Rajarshi Darshan</p>
+                <p className="text-white font-bold text-lg">Ambica Apartment</p>
                 <p className="text-sm text-slate-500">Society Management System</p>
               </div>
             </div>

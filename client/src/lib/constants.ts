@@ -48,7 +48,7 @@ export const ASSET_STATUS = {
 } as const;
 
 // Society Info
-export const SOCIETY_NAME = 'Rajarshi Darshan';
+export const SOCIETY_NAME = 'Ambica Apartment';
 export const SOCIETY_TAGLINE = 'Society Management';
 
 // Flat numbers list (4 floors, 10 flats each)

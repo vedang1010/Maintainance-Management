@@ -1,8 +1,8 @@
-# Architecture: Rajarshi Darshan Society Management System
+# Architecture: Ambica Apartment Management System
 
 ## Overview
 
-A full-stack society management web application for **Rajarshi Darshan** housing society (~40 flats). The system handles maintenance collection via Razorpay (₹1000/month + ₹100 late fee), lift emergency alerts via email, complaints with image uploads, asset tracking, and a dedicated watchman portal. Built with Next.js 14 + Express.js + MongoDB, deployed on Vercel + Render.
+A full-stack society management web application for **Ambica Apartment** housing society (~40 flats). The system handles maintenance collection via Razorpay (₹1000/month + ₹100 late fee), lift emergency alerts via email, complaints with image uploads, asset tracking, and a dedicated watchman portal. Built with Next.js 14 + Express.js + MongoDB, deployed on Vercel + Render.
 
 ---
 
@@ -896,7 +896,7 @@ AssetSchema.index({ status: 1 });
 
 ### Base URL
 - **Development:** `http://localhost:4000/api`
-- **Production:** `https://api.rajarshidarshan.com/api`
+- **Production:** `https://api.ambicaapartment.com/api`
 
 ### Authentication Endpoints
 
@@ -1034,7 +1034,7 @@ Request → CORS → Body Parser → Auth Middleware → Role Middleware → Con
 
 ### 1. Maintenance Invoice (Day 1)
 ```
-Subject: 🏠 Maintenance Due - {Month} {Year} | Rajarshi Darshan
+Subject: 🏠 Maintenance Due - {Month} {Year} | Ambica Apartment
 
 Dear {Name} (Flat {Flat_No}),
 
@@ -1048,12 +1048,12 @@ Due Date: {Due_Date}
 Please pay before the due date to avoid late fees.
 
 Regards,
-Rajarshi Darshan Society
+Ambica Apartment
 ```
 
 ### 2. Payment Reminder (Day 10)
 ```
-Subject: ⏰ Reminder: Maintenance Payment Pending | Rajarshi Darshan
+Subject: ⏰ Reminder: Maintenance Payment Pending | Ambica Apartment
 
 Dear {Name},
 
@@ -1066,12 +1066,12 @@ Due Date: {Due_Date}
 [Pay Now] → {Payment_Link}
 
 Regards,
-Rajarshi Darshan Society
+Ambica Apartment
 ```
 
 ### 3. Final Warning (Day 16)
 ```
-Subject: ⚠️ Final Notice: Pay Before Late Fee Applies | Rajarshi Darshan
+Subject: ⚠️ Final Notice: Pay Before Late Fee Applies | Ambica Apartment
 
 Dear {Name},
 
@@ -1084,12 +1084,12 @@ Late Fee: ₹100 will be added after due date
 [Pay Now] → {Payment_Link}
 
 Regards,
-Rajarshi Darshan Society
+Ambica Apartment
 ```
 
 ### 4. Payment Confirmation
 ```
-Subject: ✅ Payment Received - Thank You! | Rajarshi Darshan
+Subject: ✅ Payment Received - Thank You! | Ambica Apartment
 
 Dear {Name},
 
@@ -1101,12 +1101,12 @@ Payment Date: {Date}
 For Month: {Month} {Year}
 
 Regards,
-Rajarshi Darshan Society
+Ambica Apartment
 ```
 
 ### 5. Lift Emergency Alert
 ```
-Subject: 🚨 LIFT EMERGENCY - Rajarshi Darshan
+Subject: 🚨 LIFT EMERGENCY - Ambica Apartment
 
 ⚠️ URGENT: SOMEONE IS STUCK IN THE LIFT!
 
@@ -1116,12 +1116,12 @@ Time: {Timestamp}
 Please provide immediate assistance!
 
 ---
-This is an automated alert from Rajarshi Darshan Society Management System.
+This is an automated alert from Ambica Apartment Management System.
 ```
 
 ### 6. Emergency Resolved
 ```
-Subject: ✅ Lift Emergency Resolved | Rajarshi Darshan
+Subject: ✅ Lift Emergency Resolved | Ambica Apartment
 
 The lift emergency has been resolved.
 
@@ -1131,12 +1131,12 @@ Resolution Time: {Timestamp}
 Thank you for your assistance.
 
 Regards,
-Rajarshi Darshan Society
+Ambica Apartment
 ```
 
 ### 7. Password Reset OTP
 ```
-Subject: 🔐 Password Reset OTP | Rajarshi Darshan
+Subject: 🔐 Password Reset OTP | Ambica Apartment
 
 Your OTP for password reset is:
 
@@ -1147,12 +1147,12 @@ This OTP is valid for 10 minutes.
 If you didn't request this, please ignore this email.
 
 Regards,
-Rajarshi Darshan Society
+Ambica Apartment
 ```
 
 ### 8. Complaint Status Update
 ```
-Subject: 📋 Complaint Status Updated | Rajarshi Darshan
+Subject: 📋 Complaint Status Updated | Ambica Apartment
 
 Dear {Name},
 
@@ -1165,7 +1165,7 @@ Updated By: {Admin_Name}
 {Admin_Notes}
 
 Regards,
-Rajarshi Darshan Society
+Ambica Apartment
 ```
 
 ---
@@ -1206,8 +1206,8 @@ RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxxxxxx
 
 # Brevo
 BREVO_API_KEY=xkeysib-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-BREVO_SENDER_EMAIL=noreply@rajarshidarshan.com
-BREVO_SENDER_NAME=Rajarshi Darshan Society
+BREVO_SENDER_EMAIL=noreply@ambicaapartment.com
+BREVO_SENDER_NAME=Ambica Apartment
 
 # ImageKit
 IMAGEKIT_PUBLIC_KEY=public_xxxxxxxxxxxx
@@ -1417,4 +1417,4 @@ npm run dev
 
 ## Ready for Implementation! 🚀
 
-This architecture document provides a comprehensive blueprint for building the Rajarshi Darshan Society Management System. All major decisions have been documented with rationale, and the system is designed for future extensibility.
+This architecture document provides a comprehensive blueprint for building the Ambica Apartment Management System. All major decisions have been documented with rationale, and the system is designed for future extensibility.

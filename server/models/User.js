@@ -28,6 +28,28 @@ const UserSchema = new mongoose.Schema({
     },
     match: [/^[1-9]\d{2}$/, 'Please enter a valid flat number']
   },
+  building_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Building',
+    required: false
+  },
+  flat_area: {
+    type: Number,
+    required: false,
+    default: 0
+  },
+
+  parking: {
+    two_wheeler: {
+      type: Number,
+      default: 0
+    },
+
+    four_wheeler: {
+      type: Number,
+      default: 0
+    }
+  },
   role: {
     type: String,
     enum: ['manager', 'admin', 'resident', 'watchman'],
@@ -61,6 +83,7 @@ const UserSchema = new mongoose.Schema({
 // Indexes
 UserSchema.index({ flat_no: 1 });
 UserSchema.index({ role: 1 });
+UserSchema.index({ building_id: 1, flat_no: 1 }, { unique: true }); 
 
 // Hash password before saving
 UserSchema.pre('save', async function() {

@@ -1,7 +1,7 @@
 {
-  "name": "rajarshi-darshan-server",
+  "name": "ambica-apartment-server",
   "version": "1.0.0",
-  "description": "Backend API for Rajarshi Darshan Society Management System",
+  "description": "Backend API for Ambica Apartment Management System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -11,7 +11,12 @@
     "seed:clear": "node scripts/seedData.js --clear",
     "seed:reset": "node scripts/seedData.js --reset"
   },
-  "keywords": ["society", "management", "express", "mongodb"],
+  "keywords": [
+    "society",
+    "management",
+    "express",
+    "mongodb"
+  ],
   "author": "Aayush Vaghela",
   "license": "ISC",
   "type": "commonjs",
@@ -25,6 +30,7 @@
     "helmet": "^8.1.0",
     "imagekit": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.1.0",
     "mongoose": "^9.1.5",
     "morgan": "^1.10.1",
     "node-cron": "^4.2.1",

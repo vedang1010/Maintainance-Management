@@ -1,6 +1,6 @@
 # 🔧 Society Management - Backend API
 
-The Express.js REST API backend for Rajarshi Darshan Society Management System.
+The Express.js REST API backend for Ambica Apartment Management System.
 
 <p align="center">
   <img src="https://img.shields.io/badge/Express.js-4.x-000000?style=flat-square&logo=express" alt="Express.js" />
@@ -129,7 +129,7 @@ server/
    # Brevo
    BREVO_API_KEY=xkeysib-xxxx
    BREVO_SENDER_EMAIL=noreply@domain.com
-   BREVO_SENDER_NAME=Rajarshi Darshan Society
+   BREVO_SENDER_NAME=Ambica Apartment
    
    # ImageKit
    IMAGEKIT_PUBLIC_KEY=public_xxxx

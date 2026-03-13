@@ -1,5 +1,10 @@
 const mongoose = require('mongoose');
-
+const ComponentSchema = new mongoose.Schema({
+  name: String,
+  calculation_type: String,
+  rate: Number,
+  amount: Number
+});
 const MaintenanceSchema = new mongoose.Schema({
   user_id: {
     type: mongoose.Schema.Types.ObjectId,
@@ -20,10 +25,13 @@ const MaintenanceSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'Year is required']
   },
+  components: [
+    ComponentSchema
+  ],
+
   amount: {
     type: Number,
-    required: true,
-    default: 1000 // ₹1000 fixed
+    required: true
   },
   late_fee: {
     type: Number,

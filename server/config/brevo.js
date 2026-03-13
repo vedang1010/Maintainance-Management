@@ -9,8 +9,8 @@ apiKey.apiKey = process.env.BREVO_API_KEY;
 
 // Default sender
 const defaultSender = {
-  email: process.env.BREVO_SENDER_EMAIL || 'noreply@rajarshidarshan.com',
-  name: process.env.BREVO_SENDER_NAME || 'Rajarshi Darshan Society'
+  email: process.env.BREVO_SENDER_EMAIL || 'noreply@ambicaapartment.com',
+  name: process.env.BREVO_SENDER_NAME || 'Ambica Apartment'
 };
 
 module.exports = {

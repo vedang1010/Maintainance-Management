@@ -176,7 +176,7 @@ export default function MaintenancePage() {
         key: orderData.key_id,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: 'Rajarshi Darshan Society',
+        name: 'Ambica Apartment',
         description: `Maintenance for ${getMonthName(orderData.maintenance.month)} ${orderData.maintenance.year}`,
         order_id: orderData.order_id,
         handler: async (response: RazorpayResponse) => {
@@ -349,6 +349,7 @@ export default function MaintenancePage() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
+
                 <p className="text-sm text-gray-500">Total Amount</p>
                 <p className={`text-3xl font-bold ${
                   currentMaintenance.status === 'paid' ? 'text-green-600' : 
@@ -356,16 +357,63 @@ export default function MaintenancePage() {
                 }`}>
                   {formatAmount(currentMaintenance.total_amount)}
                 </p>
-                {currentMaintenance.late_fee > 0 && (
+                  {currentMaintenance.components && (
+                  <div className="mt-4 border rounded-lg p-3 bg-gray-50">
+                    <p className="text-sm font-medium mb-2">Maintenance Breakdown</p>
+
+                   {currentMaintenance.components.map((c, index) => (
+
+  <div
+    key={index}
+    className="flex justify-between text-sm py-1 items-center"
+  >
+
+    <div className="flex flex-col">
+
+      <span className="text-gray-700 font-medium">
+        {c.name}
+      </span>
+
+      {/* Show rate calculation */}
+      {c.calculation_type === "per_sqft" && (
+        <span className="text-xs text-gray-500">
+          {c.rate} × {user?.flat_area} sqft
+        </span>
+      )}
+
+      {c.calculation_type === "per_vehicle" && (
+        <span className="text-xs text-gray-500">
+          {c.rate} × {c.quantity}
+        </span>
+      )}
+
+    </div>
+
+    <span className="font-semibold text-gray-900">
+      {formatAmount(c.amount)}
+    </span>
+
+  </div>
+
+))}
+                  </div>
+                )}
+                {currentMaintenance.penalty > 0 && (
                   <p className="text-xs text-red-600 mt-1">
-                    Includes {formatAmount(currentMaintenance.late_fee)} late fee
+                    Includes {formatAmount(currentMaintenance.penalty)} late fee
                   </p>
                 )}
               </div>
               <div className="text-right">
-                <p className="text-sm text-gray-500">Flat No.</p>
-                <p className="text-2xl font-semibold text-gray-900">{currentMaintenance.flat_no}</p>
-              </div>
+                <p className="text-sm text-gray-500">Flat</p>
+
+<p className="text-2xl font-semibold text-gray-900">
+  {currentMaintenance.flat_no}
+</p>
+
+<p className="text-xs text-gray-500">
+  {user?.flat_area} sqft
+</p></div>
             </div>
 
             {currentMaintenance.status !== 'paid' && (
@@ -436,9 +484,9 @@ export default function MaintenancePage() {
                     </TableCell>
                     <TableCell>
                       {formatAmount(maintenance.total_amount)}
-                      {maintenance.late_fee > 0 && (
+                      {maintenance.penalty > 0 && (
                         <span className="text-xs text-red-600 block">
-                          +{formatAmount(maintenance.late_fee)} late fee
+                          +{formatAmount(maintenance.penalty)} late fee
                         </span>
                       )}
                     </TableCell>
@@ -475,7 +523,7 @@ export default function MaintenancePage() {
                                 flatNo: maintenance.flat_no,
                                 paymentDate: maintenance.paid_date || new Date().toISOString(),
                                 userName: user?.name || '',
-                                lateFee: maintenance.late_fee,
+                                lateFee: maintenance.penalty,
                               });
                               toast({
                                 title: 'Receipt Downloaded',

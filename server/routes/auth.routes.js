@@ -30,4 +30,5 @@ router.post('/verify-otp', authController.verifyOTP);
 // POST /api/auth/reset-password - Reset password
 router.post('/reset-password', authController.resetPassword);
 
+router.get('/check-flat', authController.checkFlatAvailability);
 module.exports = router;

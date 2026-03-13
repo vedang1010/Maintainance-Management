@@ -144,7 +144,7 @@ export default function ManagerSetupPage() {
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">Manager Setup</CardTitle>
         <CardDescription className="text-center">
-          Set up the first manager account for Rajarshi Darshan
+          Set up the first manager account for Ambica Apartment
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>

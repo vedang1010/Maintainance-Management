@@ -37,5 +37,11 @@ router.post('/cron/late-fees', authorize('manager'), maintenanceController.trigg
 
 // POST /api/maintenance/cron/reminders - Manually send payment reminders
 router.post('/cron/reminders', authorize('manager'), maintenanceController.triggerPaymentReminders);
+// Manager updates building maintenance components
 
+router.put("/template", authorize("manager"), maintenanceController.updateMaintenanceTemplate);
+
+router.put("/parking-rules", authorize("manager"), maintenanceController.updateParkingRules);
+
+router.put("/penalty-rules", authorize("manager"), maintenanceController.updatePenaltyRules);
 module.exports = router;

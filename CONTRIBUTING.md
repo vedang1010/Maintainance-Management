@@ -1,4 +1,4 @@
-# Contributing to Rajarshi Darshan Society Management
+# Contributing to Ambica Apartment Management
 
 First off, thank you for considering contributing to this project! 🎉
 

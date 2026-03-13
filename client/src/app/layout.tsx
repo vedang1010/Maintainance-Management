@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Rajarshi Darshan - Society Management",
-  description: "Society Management System for Rajarshi Darshan Housing Society",
+  title: "Ambica Apartment - Society Management",
+  description: "Society Management System for Ambica Apartment Housing Society",
 };
 
 export default function RootLayout({

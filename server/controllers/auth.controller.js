@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { generateOTP, getOTPExpiry } = require('../utils/generateOTP');
 const emailService = require('../services/email.service');
+const Building = require("../models/Building");
 
 // Helper: Generate JWT Token
 const generateToken = (userId) => {
@@ -41,15 +42,13 @@ exports.register = async (req, res, next) => {
   try {
     const { name, email, password, flat_no, phone } = req.body;
 
-    // Validate required fields
     if (!name || !email || !password || !flat_no || !phone) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide all required fields: name, email, password, flat_no, phone'
+        message: 'Please provide all required fields'
       });
     }
 
-    // Validate password length
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
@@ -57,55 +56,70 @@ exports.register = async (req, res, next) => {
       });
     }
 
-    // Validate flat number format
     if (!isValidFlatNo(flat_no)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid flat number. Must be between 101-110, 201-210, 301-310, or 401-410'
+        message: 'Invalid flat number'
       });
     }
 
-    // Check if email already exists
+    // Check email duplicate
     const existingEmail = await User.findOne({ email: email.toLowerCase() });
+
     if (existingEmail) {
       return res.status(400).json({
         success: false,
-        message: 'Email is already registered'
+        message: 'Email already registered'
       });
     }
 
-    // Check if flat is already registered
-    const existingFlat = await User.findOne({ flat_no });
+    // Get building
+    const building = await Building.findOne();
+
+    if (!building) {
+      return res.status(500).json({
+        success: false,
+        message: 'Building configuration missing'
+      });
+    }
+
+    // Find flat in building
+    const flatData = building.flats.find(f => f.flat_no === flat_no);
+
+    if (!flatData) {
+      return res.status(400).json({
+        success: false,
+        message: 'Flat does not exist in this building'
+      });
+    }
+
+    // Check duplicate flat registration (SECURITY)
+    const existingFlat = await User.findOne({
+      building_id: building._id,
+      flat_no
+    });
+
     if (existingFlat) {
       return res.status(400).json({
         success: false,
-        message: 'This flat is already registered'
+        message: 'This flat already has a registered account'
       });
     }
 
-    // Check if manager exists (residents can only register after manager)
-    const managerExists = await User.findOne({ role: 'manager' });
-    if (!managerExists) {
-      return res.status(400).json({
-        success: false,
-        message: 'Manager must be registered first. Please contact your society manager.'
-      });
-    }
-
-    // Create user
+    // Create user with auto flat area
     const user = await User.create({
       name,
       email: email.toLowerCase(),
-      password_hash: password, // Will be hashed by pre-save hook
+      password_hash: password,
       flat_no,
       phone,
-      role: 'resident'
+      role: 'resident',
+      building_id: building._id,
+      flat_area: flatData.area
     });
 
-    // Generate token
     const token = generateToken(user._id);
 
-    // Set cookie
     setTokenCookie(res, token);
 
     res.status(201).json({
@@ -118,14 +132,6 @@ exports.register = async (req, res, next) => {
     });
 
   } catch (error) {
-    // Handle mongoose validation errors
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({
-        success: false,
-        message: messages.join('. ')
-      });
-    }
     next(error);
   }
 };
@@ -583,5 +589,60 @@ exports.resetPassword = async (req, res, next) => {
 
   } catch (error) {
     next(error);
+  }
+};
+
+
+exports.checkFlatAvailability = async (req, res) => {
+  try {
+
+    const { flat_no } = req.query;
+
+    if (!flat_no) {
+      return res.status(400).json({
+        success:false,
+        message:"Flat number required"
+      });
+    }
+
+    const building = await Building.findOne();
+
+    if (!building) {
+      return res.status(404).json({
+        success:false,
+        message:"Building not configured"
+      });
+    }
+
+    const flatExists = building.flats.some(f => f.flat_no === flat_no);
+
+    if (!flatExists) {
+      return res.status(400).json({
+        success:false,
+        message:"Flat does not exist"
+      });
+    }
+
+    const existingUser = await User.findOne({
+      building_id: building._id,
+      flat_no
+    });
+
+    res.json({
+      success:true,
+      data:{
+        available: !existingUser
+      }
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      success:false,
+      message:"Server error"
+    });
+
   }
 };

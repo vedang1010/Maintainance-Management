@@ -9,7 +9,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: rajarshi-darshan-api
+    container_name: ambica-apartment-api
     ports:
       - "4000:4000"
     environment:
@@ -43,7 +43,7 @@ services:
   #   build:
   #     context: ./client
   #     dockerfile: Dockerfile
-  #   container_name: rajarshi-darshan-client
+  #   container_name: ambica-apartment-client
   #   ports:
   #     - "3000:3000"
   #   environment:
@@ -54,4 +54,4 @@ services:
 
 networks:
   default:
-    name: rajarshi-darshan-network
+    name: ambica-apartment-network

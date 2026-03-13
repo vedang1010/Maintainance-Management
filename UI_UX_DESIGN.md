@@ -1,4 +1,4 @@
-# UI/UX Design Specification: Rajarshi Darshan Society Management
+# UI/UX Design Specification: Ambica Apartment Management
 
 A comprehensive design guide for building a clean, modern, and fully responsive society management application.
 
@@ -23,13 +23,13 @@ A comprehensive design guide for building a clean, modern, and fully responsive 
 **Text-Based Logo:**
 ```
 ┌─────────────────────────────────┐
-│  🏢 Rajarshi Darshan           │
+│  🏢 Ambica Apartment           │
 │     Society Management          │
 └─────────────────────────────────┘
 ```
 
 **Typography for Logo:**
-- Primary Text: **"Rajarshi Darshan"** - Font: Inter Bold, 24px
+- Primary Text: **"Ambica Apartment"** - Font: Inter Bold, 24px
 - Secondary Text: **"Society Management"** - Font: Inter Regular, 14px, muted color
 
 **Favicon:** 🏢 or "RD" monogram in primary color
@@ -189,7 +189,7 @@ Using Tailwind's default 4px base unit:
 ┌─────────────────────────────────────────────────┐
 │                                                 │
 │           ┌─────────────────────┐              │
-│           │  🏢 Rajarshi Darshan │              │
+│           │  🏢 Ambica Apartment │              │
 │           │   Society Management │              │
 │           └─────────────────────┘              │
 │                                                 │
@@ -225,7 +225,7 @@ Using Tailwind's default 4px base unit:
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  🏢 Rajarshi Darshan          Welcome, Aayush (Flat 101)   [👤]   │
+│  🏢 Ambica Apartment          Welcome, Aayush (Flat 101)   [👤]   │
 ├──────────────┬─────────────────────────────────────────────────────┤
 │              │                                                      │
 │   🏠 Home    │   ┌──────────────────────────────────────────────┐ │
@@ -266,7 +266,7 @@ Using Tailwind's default 4px base unit:
 
 ```
 ┌─────────────────────────────┐
-│  🏢 Rajarshi Darshan   ☰   │
+│  🏢 Ambica Apartment   ☰   │
 ├─────────────────────────────┤
 │                             │
 │  ┌───────────────────────┐  │

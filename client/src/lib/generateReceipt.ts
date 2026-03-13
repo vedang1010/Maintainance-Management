@@ -46,7 +46,7 @@ export const generateReceiptPDF = (data: ReceiptData) => {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
-  doc.text('RAJARSHI DARSHAN', pageWidth / 2, 20, { align: 'center' });
+  doc.text('Ambica Apartment', pageWidth / 2, 20, { align: 'center' });
   
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
@@ -227,7 +227,7 @@ export const generateReceiptPDF = (data: ReceiptData) => {
   doc.text('This is a computer-generated receipt and does not require a signature.', pageWidth / 2, y, { align: 'center' });
   
   y += 6;
-  doc.text('For queries, contact: rajarshidarshan@gmail.com', pageWidth / 2, y, { align: 'center' });
+  doc.text('For queries, contact: ambicaapartment@gmail.com', pageWidth / 2, y, { align: 'center' });
   
   y += 10;
   doc.setFontSize(7);

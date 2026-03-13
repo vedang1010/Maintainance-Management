@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const fs = require('fs');
-require('dotenv').config({ path: '.env.local' });
+require('dotenv').config({ path: '.env.example' });
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -45,7 +45,7 @@ app.use(cookieParser()); // Parse cookies
 app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok', 
-    message: 'Rajarshi Darshan Society Management API is running',
+    message: 'Ambica Apartment Management API is running',
     timestamp: new Date().toISOString()
   });
 });

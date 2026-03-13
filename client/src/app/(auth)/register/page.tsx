@@ -7,16 +7,29 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { FLAT_NUMBERS } from '@/lib/constants';
 import api from '@/lib/api';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { isAuthenticated, loading: authLoading } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -25,12 +38,14 @@ export default function RegisterPage() {
     flat_no: '',
     phone: '',
   });
+
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [checkingManager, setCheckingManager] = useState(true);
+  const [checkingFlat, setCheckingFlat] = useState(false);
 
-  // Check if manager exists, if not redirect to manager-setup
+  // Check manager exists
   useEffect(() => {
     const checkManager = async () => {
       try {
@@ -44,10 +59,11 @@ export default function RegisterPage() {
         setCheckingManager(false);
       }
     };
+
     checkManager();
   }, [router]);
 
-  // Redirect if already authenticated
+  // Redirect authenticated users
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
       router.push('/');
@@ -55,28 +71,54 @@ export default function RegisterPage() {
   }, [isAuthenticated, authLoading, router]);
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     setError('');
+  };
+
+  // Check flat availability
+  const checkFlatAvailability = async (flat: string) => {
+    try {
+      setCheckingFlat(true);
+
+      const res = await api.get(`/auth/check-flat?flat_no=${flat}`);
+
+      if (!res.data.data.available) {
+        setError('This flat already has a registered resident.');
+        return false;
+      }
+
+      return true;
+    } catch (err) {
+      console.error(err);
+      return true;
+    } finally {
+      setCheckingFlat(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setError('');
     setSuccess('');
-    
-    // Validation
-    const { name, email, password, confirmPassword, flat_no, phone } = formData;
-    
+
+    const { name, email, password, confirmPassword, flat_no, phone } =
+      formData;
+
     if (!name || !email || !password || !confirmPassword || !flat_no || !phone) {
       setError('Please fill in all fields');
       return;
     }
 
-    if (!email.includes('@')) {
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
       setError('Please enter a valid email address');
       return;
     }
 
+    // Password validation
     if (password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
@@ -87,13 +129,19 @@ export default function RegisterPage() {
       return;
     }
 
+    // Phone validation
     if (!/^\d{10}$/.test(phone)) {
       setError('Please enter a valid 10-digit phone number');
       return;
     }
 
+    // Check flat availability
+    const available = await checkFlatAvailability(flat_no);
+
+    if (!available) return;
+
     setLoading(true);
-    
+
     try {
       const response = await api.post('/auth/register', {
         name,
@@ -102,9 +150,10 @@ export default function RegisterPage() {
         flat_no,
         phone,
       });
-      
+
       if (response.data.success) {
         setSuccess('Registration successful! Redirecting to login...');
+
         setTimeout(() => {
           router.push('/login');
         }, 2000);
@@ -112,19 +161,21 @@ export default function RegisterPage() {
         setError(response.data.message || 'Registration failed');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(
+        err.response?.data?.message ||
+          'Registration failed. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  // Show loading while checking auth/manager status
   if (authLoading || checkingManager) {
     return (
       <Card className="shadow-lg">
         <CardContent className="py-8">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="flex justify-center">
+            <div className="animate-spin h-8 w-8 border-b-2 border-primary rounded-full"></div>
           </div>
         </CardContent>
       </Card>
@@ -134,11 +185,15 @@ export default function RegisterPage() {
   return (
     <Card className="shadow-lg">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center">
+          Create Account
+        </CardTitle>
+
         <CardDescription className="text-center">
-          Register as a resident of Rajarshi Darshan
+          Register as a resident
         </CardDescription>
       </CardHeader>
+
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {error && (
@@ -146,27 +201,30 @@ export default function RegisterPage() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          
+
           {success && (
             <Alert className="border-green-500 bg-green-50 text-green-700">
               <AlertDescription>{success}</AlertDescription>
             </Alert>
           )}
-          
+
+          {/* Name */}
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
+
             <Input
               id="name"
-              type="text"
               placeholder="Enter your full name"
               value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
               disabled={loading}
             />
           </div>
-          
+
+          {/* Email */}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
+
             <Input
               id="email"
               type="email"
@@ -176,18 +234,21 @@ export default function RegisterPage() {
               disabled={loading}
             />
           </div>
-          
+
+          {/* Flat + Phone */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="flat_no">Flat Number</Label>
-              <Select 
-                value={formData.flat_no} 
-                onValueChange={(value) => handleChange('flat_no', value)}
-                disabled={loading}
+              <Label>Flat Number</Label>
+
+              <Select
+                value={formData.flat_no}
+                onValueChange={(v) => handleChange('flat_no', v)}
+                disabled={loading || checkingFlat}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select flat" />
                 </SelectTrigger>
+
                 <SelectContent>
                   {FLAT_NUMBERS.map((flat) => (
                     <SelectItem key={flat} value={flat}>
@@ -197,61 +258,69 @@ export default function RegisterPage() {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label>Phone</Label>
+
               <Input
-                id="phone"
-                type="tel"
-                placeholder="10-digit number"
+                placeholder="10 digit number"
                 value={formData.phone}
-                onChange={(e) => handleChange('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
+                onChange={(e) =>
+                  handleChange(
+                    'phone',
+                    e.target.value.replace(/\D/g, '').slice(0, 10)
+                  )
+                }
                 disabled={loading}
               />
             </div>
           </div>
-          
+
+          {/* Password */}
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label>Password</Label>
+
             <Input
-              id="password"
               type="password"
-              placeholder="Create a password (min 6 characters)"
+              placeholder="Minimum 6 characters"
               value={formData.password}
               onChange={(e) => handleChange('password', e.target.value)}
               disabled={loading}
             />
           </div>
-          
+
+          {/* Confirm Password */}
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label>Confirm Password</Label>
+
             <Input
-              id="confirmPassword"
               type="password"
-              placeholder="Confirm your password"
+              placeholder="Re-enter password"
               value={formData.confirmPassword}
-              onChange={(e) => handleChange('confirmPassword', e.target.value)}
+              onChange={(e) =>
+                handleChange('confirmPassword', e.target.value)
+              }
               disabled={loading}
             />
           </div>
         </CardContent>
-        
+
         <CardFooter className="flex flex-col space-y-4">
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full"
-            disabled={loading}
+            disabled={loading || !formData.flat_no}
           >
             {loading ? 'Creating Account...' : 'Create Account'}
           </Button>
-          
+
           <p className="text-sm text-center text-gray-600">
             Already have an account?{' '}
-            <Link 
-              href="/login" 
+            <Link
+              href="/login"
               className="text-primary font-medium hover:underline"
             >
-              Sign in here
+              Sign in
             </Link>
           </p>
         </CardFooter>
